@@ -1,0 +1,5 @@
+# Entrar na pasta do projeto: cd "projeto_crud".
+# É necessário ter o gcc instalado em seu computador
+#       GCC 13.2.0 (with POSIX threads) + LLVM/Clang/LLD/LLDB 18.1.5 + MinGW-w64 11.0.1 (UCRT) - release 8
+#       Win64:  without LLVM/Clang/LLD/LLDB: Zip archive
+# Digitar no terminal: gcc crud_produto.c -o crud_produto.exe
