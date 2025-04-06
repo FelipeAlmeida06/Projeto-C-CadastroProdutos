@@ -3,6 +3,7 @@
 #include <string.h>         
 
 #define MAX_PRODUTOS 10     // constante com valor 10
+#define MAX_CARRINHO 20     // constante com valor 20
 
 typedef struct {
     int idProduto;
@@ -13,7 +14,9 @@ typedef struct {
 } Produto;
 
 Produto produtos[MAX_PRODUTOS];
+Produto carrinho[MAX_CARRINHO];
 int totalProdutos = 0;
+int totalCarrinho = 0;
 
 // Método para criar produtos
 void criarProduto() {
@@ -157,6 +160,65 @@ void listarProdutos() {
     }
 }
 
+// Método para criar carrinho de compras
+void criarCarrinho() {
+    if (totalProdutos == 0) {
+        printf("Nenhum produto cadastrado. Nao e possivel criar carrinho.\n");
+        return;
+    }
+
+    int idEscolhido;
+    int quantidade;
+    float totalCompra = 0.0;
+    char continuar;
+
+    printf("Produtos disponíveis:\n");
+    listarProdutos();
+
+    do {
+        printf("Digite o ID do produto que deseja adicionar ao carrinho: ");
+        scanf("%d", &idEscolhido);
+
+        Produto* prod = buscarProduto(idEscolhido);
+        if (prod == NULL) {
+            printf("Produto nao encontrado. Encerrando o programa.\n");
+            exit(1);
+        }
+
+        printf("Digite a quantidade do produto que deseja adicionar: ");
+        scanf("%d", &quantidade);
+        if (quantidade <= 0) {
+            printf("Quantidade invalida. Encerrando o programa.\n");
+            exit(1);
+        }
+
+        Produto itemCarrinho = *prod;
+        itemCarrinho.quantidadeProduto = quantidade;
+
+        carrinho[totalCarrinho] = itemCarrinho;
+        totalCompra += itemCarrinho.precoProduto * quantidade;
+        totalCarrinho++;
+
+        printf("Produto adicionado ao carrinho!\n");
+        printf("Deseja adicionar mais um produto? (s/n): ");
+        getchar();
+        scanf("%c", &continuar);
+
+    } while ((continuar == 's' || continuar == 'S') && totalCarrinho < MAX_CARRINHO);
+
+    printf("Carrinho finalizado.\n");
+    printf("Itens no carrinho:\n");
+    for (int i = 0; i < totalCarrinho; i++) {
+        printf("- %s | Quantidade: %d | Preco unitario: R$ %.2f | Subtotal: R$ %.2f\n",
+               carrinho[i].nomeProduto,
+               carrinho[i].quantidadeProduto,
+               carrinho[i].precoProduto,
+               carrinho[i].precoProduto * carrinho[i].quantidadeProduto);
+    }
+
+    printf("Total da compra: R$ %.2f\n", totalCompra);
+}
+
 // Função principal do programa
 int main() {
     int opcaoDesejada;
@@ -167,7 +229,8 @@ int main() {
         printf("2. Listar Produtos\n");
         printf("3. Atualizar Produto\n");
         printf("4. Deletar Produto\n");
-        printf("5. Sair\n");
+        printf("5. Criar Carrinho de Compras\n");
+        printf("6. Sair\n");
         printf("==============================\n");
         printf("Escolha uma opcao: ");
         scanf("%d", &opcaoDesejada);
@@ -187,6 +250,9 @@ int main() {
             deletarProdutos();
             break;
         case 5:
+            criarCarrinho();
+            break;
+        case 6:
             printf("Saindo do programa...\n");
             break;
         default:
