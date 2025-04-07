@@ -100,32 +100,6 @@ void atualizarProduto() {
     }
 }
 
-/* Não utilizado para essa primeira versão de programa
-// Método para remover produtos no estoque
-void removerQuantidadeDeProdutosNoEstoque() {
-    int id, quantidade;
-    printf("Digite o ID do produto a ser atualizado no estoque: ");
-    scanf("%d", &id);
-
-    Produto* prod = buscarProduto(id);
-    if (prod) {
-        printf("Quantidade atual no estoque: %d\n", prod->quantidadeProduto);
-        printf("Digite a quantidade a ser removida do estoque: ");
-        getchar();
-        scanf("%d", &quantidade);
-
-        if (quantidade > prod->quantidadeProduto) {
-            printf("Erro: Quantidade insuficiente no estoque.\n");
-        } else {
-            prod->quantidadeProduto -= quantidade;
-            printf("Quantidade atualizada com sucesso! Novo estoque: %d\n", prod->quantidadeProduto);
-        }
-    } else {
-        printf("Produto não encontrado.\n");
-    }
-}
-*/
-
 // Método para deletar produtos
 void deletarProdutos() {
     int id;
@@ -192,6 +166,16 @@ void criarCarrinho() {
             exit(1);
         }
 
+        if (quantidade > prod->quantidadeProduto) {
+            printf("Erro: Quantidade solicitada excede o estoque disponível de (%d unidades.)\n", prod->quantidadeProduto);
+            printf("Encerrando o programa.\n");
+            exit(1);
+        }
+
+        // Atualiza estoque
+        prod->quantidadeProduto -= quantidade; 
+
+        // Adiciona ao carrinho
         Produto itemCarrinho = *prod;
         itemCarrinho.quantidadeProduto = quantidade;
 
@@ -219,6 +203,79 @@ void criarCarrinho() {
     printf("Total da compra: R$ %.2f\n", totalCompra);
 }
 
+// Método para limpar o carrinho
+void limparCarrinho() {
+    if (totalCarrinho == 0) {
+        printf("Nao existe um carrinho criado. Encerrando o programa.\n");
+        exit(1);
+    }
+
+    // Devolver os itens ao estoque
+    for (int i = 0; i < totalCarrinho; i++) {
+        Produto* prod = buscarProduto(carrinho[i].idProduto);
+        if (prod != NULL) {
+            prod->quantidadeProduto += carrinho[i].quantidadeProduto;
+        }
+    }
+
+    totalCarrinho = 0;
+    printf("Compra cancelada com sucesso! Produtos devolvidos ao estoque.\n");
+}
+
+// Método para filtrar produtos por ID
+void filtrarProdutoPorId() {
+    if (totalProdutos == 0) {
+        printf("Nao existe produtos cadastrados. Nenhum produto para filtrar.\n");
+        return;
+    }
+
+    int id;
+    printf("Digite o ID do produto: ");
+    scanf("%d", &id);
+    Produto* prod = buscarProduto(id);
+    if (prod != NULL) {
+        printf("ID: %d | Nome: %s | Preco: R$ %.2f | Categoria: %s | Quantidade: %d\n",
+               prod->idProduto,
+               prod->nomeProduto,
+               prod->precoProduto,
+               prod->categoriaProduto,
+               prod->quantidadeProduto);
+    } else {
+        printf("Produto nao encontrado.\n");
+        return;
+    }
+}
+
+// Método para filtrar produtos por Nome
+void filtrarProdutoPorNome() {
+    if (totalProdutos == 0) {
+        printf("Nao existe produtos cadastrados. Encerrando o programa.\n");
+        return;
+    }
+
+    char nome[50];
+    getchar();
+    printf("Digite o nome do produto: ");
+    scanf(" %49[^\n]", nome);
+
+    int encontrado = 0;
+    for (int i = 0; i < totalProdutos; i++) {
+        if (strcasecmp(produtos[i].nomeProduto, nome) == 0) {
+            printf("ID: %d | Nome: %s | Preco: R$ %.2f | Categoria: %s | Quantidade: %d\n",
+                   produtos[i].idProduto,
+                   produtos[i].nomeProduto,
+                   produtos[i].precoProduto,
+                   produtos[i].categoriaProduto,
+                   produtos[i].quantidadeProduto);
+            encontrado = 1;
+        }
+    }
+
+    if (!encontrado) {
+        printf("Produto nao encontrado.\n");
+    }
+}
+
 // Função principal do programa
 int main() {
     int opcaoDesejada;
@@ -230,7 +287,10 @@ int main() {
         printf("3. Atualizar Produto\n");
         printf("4. Deletar Produto\n");
         printf("5. Criar Carrinho de Compras\n");
-        printf("6. Sair\n");
+        printf("6. Filtrar Produto por ID\n");
+        printf("7. Filtrar Produto por Nome\n");
+        printf("8. Limpar Carrinho de Compras\n");
+        printf("9. Sair\n");
         printf("==============================\n");
         printf("Escolha uma opcao: ");
         scanf("%d", &opcaoDesejada);
@@ -253,12 +313,21 @@ int main() {
             criarCarrinho();
             break;
         case 6:
+            filtrarProdutoPorId();
+            break;
+        case 7:
+            filtrarProdutoPorNome();
+            break;
+        case 8:
+            limparCarrinho();
+            break;
+        case 9:
             printf("Saindo do programa...\n");
             break;
         default:
             printf("Opcao invalida!\n");
         }
-    } while (opcaoDesejada != 6);
+    } while (opcaoDesejada != 9);
 
     return 0;
 }
